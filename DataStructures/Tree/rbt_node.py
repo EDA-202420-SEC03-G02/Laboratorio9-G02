@@ -1,6 +1,89 @@
 RED = 0
 BLACK = 1
+def rotate_left(node):
+    """
+    Realiza una rotación a la izquierda en el nodo.
+    
+    Args:
+        node: El nodo en el que se realizará la rotación
 
+    Returns:
+        El nuevo nodo raíz después de la rotación
+    """
+    right_child = node["right"]
+    node["right"] = right_child["left"]
+    right_child["left"] = node
+    right_child["color"] = node["color"]
+    change_color(node, RED)
+    
+    # Actualizar el tamaño de los subárboles
+    right_child["size"] = node["size"]
+    node["size"] = 1 + (node["left"]["size"] if node["left"] else 0) + (node["right"]["size"] if node["right"] else 0)
+    
+    return right_child
+def rotate_right(node):
+    """
+    Realiza una rotación a la derecha en el nodo.
+    
+    Args:
+        node: El nodo en el que se realizará la rotación
+
+    Returns:
+        El nuevo nodo raíz después de la rotación
+    """
+    left_child = node["left"]
+    node["left"] = left_child["right"]
+    left_child["right"] = node
+    left_child["color"] = node["color"]
+    change_color(node, RED)
+    
+    # Actualizar el tamaño de los subárboles
+    left_child["size"] = node["size"]
+    node["size"] = 1 + (node["left"]["size"] if node["left"] else 0) + (node["right"]["size"] if node["right"] else 0)
+    
+    return left_child
+def flip_colors(node):
+    """
+    Cambia el color del nodo y de sus hijos.
+    
+    Args:
+        node: El nodo cuyo color y el de sus hijos serán cambiados
+
+    Returns:
+        None
+    """
+    change_color(node, RED if node["color"] == BLACK else BLACK)
+    if node["left"]:
+        change_color(node["left"], BLACK if node["left"]["color"] == RED else RED)
+    if node["right"]:
+        change_color(node["right"], BLACK if node["right"]["color"] == RED else RED)
+
+def insert_node(node, key, value):
+    # Caso base: crear un nuevo nodo rojo si el nodo es None (hoja vacía)
+    if node is None:
+        return new_node(key, value, RED)
+
+    # Insertar el nodo en la posición correcta (comportamiento de un BST)
+    if key < get_key(node):
+        node["left"] = insert_node(node["left"], key, value)
+    elif key > get_key(node):
+        node["right"] = insert_node(node["right"], key, value)
+    else:
+        # Si la clave ya existe, actualizar el valor
+        node["value"] = value
+        return node
+
+    # Mantener las propiedades del árbol rojo-negro
+    if is_red(node["right"]) and not is_red(node["left"]):
+        node = rotate_left(node)
+    if is_red(node["left"]) and is_red(node["left"]["left"]):
+        node = rotate_right(node)
+    if is_red(node["left"]) and is_red(node["right"]):
+        flip_colors(node)
+
+    # Actualizar el tamaño del subárbol
+    node["size"] = 1 + (node["left"]["size"] if node["left"] else 0) + (node["right"]["size"] if node["right"] else 0)
+    return node
 
 def new_node(key, value, color=RED):
     """

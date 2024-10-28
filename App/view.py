@@ -50,18 +50,19 @@ def new_logic():
 
 def print_menu():
     """
-    Menu de usuario
+    Menú de usuario
     """
     print("\n")
     print("*******************************************")
     print("Bienvenido")
     print("1- Inicializar Analizador")
-    print("2- Cargar información de crimenes")
-    print("3- Consultar crimenes en un rango de fechas")
-    print("4- Consultar crimenes por codigo y fecha")
-    #TODO Agregar opción 5 en el menú, consultar por REPORTING_AREA
+    print("2- Cargar información de crímenes")
+    print("3- Consultar crímenes en un rango de fechas")
+    print("4- Consultar crímenes por código y fecha")
+    print("5- Consultar crímenes por REPORTING_AREA")  # Opción agregada
     print("0- Salir")
     print("*******************************************")
+
 
 # main del ejercicio
 def main():
@@ -70,7 +71,7 @@ def main():
     """
     # bandera para controlar el ciclo del menu
     working = True
-    crimefile = 'Boston Crimes//crime-utf8.csv'
+    crimefile = r"C:\\Users\\danie\\Downloads\\lab9\\Laboratorio9-G02\\Data\\Boston Crimes\\crime-utf8.csv"
 
     # ciclo del menu
     while working:
@@ -106,10 +107,21 @@ def main():
             print("\nTotal de ofensas tipo: " + offensecode + " en esa fecha:  " +
                 str(numoffenses))
         elif int(inputs[0]) == 5:
-            # TODO lab 9, implementar el I/O e invocar las funcions de la opcion 5
-            print("\nBuscando crimenes en un rango de areas: ")
-            print("Las areas estan numeradas con enteros (1 - 962)")
-            print("Un area desconocida tiene el el numero 9999")
-        else:
-            sys.exit(0)
+            print("\nBuscando crímenes en un rango de áreas: ")
+            print("Las áreas están numeradas con enteros (1 - 962)")
+            print("Un área desconocida tiene el número 9999")
+
+            # Solicitar el área inicial
+            initial_area = input("Ingrese el área inicial: ")
+            
+            # Solicitar el área final
+            final_area = input("Ingrese el área final: ")
+            total=logic.get_crimes_by_range_area(control,initial_area,final_area)
+            print("\nTotal de crimenes en un rango de areas: " + initial_area + final_area )
+            
+
+
+
+    else:
+         sys.exit(0)
     sys.exit(0)

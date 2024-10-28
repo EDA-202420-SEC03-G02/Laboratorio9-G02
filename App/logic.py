@@ -28,11 +28,14 @@ import os
 import csv
 import datetime
 
-# TODO Realice la importación del Árbol Rojo Negro
-# TODO Realice la importación de ArrayList (al) o SingleLinked (sl) como estructura de datos auxiliar para sus requerimientos
-# TODO Realice la importación de LinearProbing (lp) o Separate Chaining (sp) como estructura de datos auxiliar para sus requerimientos
+# Importación del Árbol Rojo Negro
+from DataStructures.Tree import red_black_tree as rbt
+# Importación de ArrayList o SingleLinked como estructura de datos auxiliar
+from DataStructures.Map import map_linear_probing as lp
+from DataStructures.List import array_list  as al
 
-data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/'
+
+data_dir = r"C:\\Users\\danie\\Downloads\\lab9\\Laboratorio9-G02\\Data\\Boston Crimes\\crime-utf8.csv"
 
 
 
@@ -52,6 +55,7 @@ def new_logic():
 
     analyzer["crimes"] = al.new_list()
     analyzer["dateIndex"] = rbt.new_map()
+    analyzer["areaIndex"] = rbt.new_map() 
     # TODO Crear el índice ordenado por áreas reportadas
     return analyzer
 
@@ -61,7 +65,7 @@ def load_data(analyzer, crimesfile):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    crimesfile = data_dir + crimesfile
+    crimesfile = crimesfile
     input_file = csv.DictReader(open(crimesfile, encoding="utf-8"),
                                 delimiter=",")
     for crime in input_file:
@@ -80,7 +84,7 @@ def add_crime(analyzer, crime):
     al.add_last(analyzer['crimes'], crime)
     update_date_index(analyzer['dateIndex'], crime)
     # TODO Actualizar el indice por areas reportadas
-
+    update_area_index(analyzer['areaIndex'], crime)
     return analyzer
 
 def update_area_index(map, crime):
@@ -97,6 +101,21 @@ def update_area_index(map, crime):
     # revisar si el area ya esta en el indice
 
     # si el area ya esta en el indice, adicionar el crimen a la lista
+    # Obtener el área del crimen
+    area = crime.get('area')
+    
+    # Si el área es un string vacío, espacio o None, usar 9999 como valor por defecto
+    if area in ["", " ", None]:
+        area = 9999
+
+    # Revisar si el área ya está en el índice
+    if area not in map:
+        # Si el área no existe, crear una nueva entrada en el índice
+        map[area] = []
+
+    # Adicionar el crimen a la lista correspondiente
+    map[area].append(crime)
+
     return map
 
 
@@ -195,54 +214,79 @@ def min_key(analyzer):
     """
     Llave mas pequena
     """
-    return rbt.left_key(analyzer["dateIndex"])
+    return rbt.min_key(analyzer["dateIndex"])
 
 
 def max_key(analyzer):
     """
     Llave mas grande
     """
-    return rbt.right_key(analyzer["dateIndex"])
+    return rbt.max_key(analyzer["dateIndex"])
 
 
 def index_height_areas(analyzer):
     """
-    Altura del arbol por areas
+    Altura del árbol por áreas.
     """
-    # TODO Retornar la altura del árbol por areas
-    pass
+    # Verifica si el atributo 'area_tree' existe y no es None
+    if "areaIndex" in analyzer and analyzer["areaIndex"] is not None:
+        return rbt.height_tree(analyzer["areaIndex"])
+    return 0  # Retorna 0 si el árbol por áreas no existe
 
 
 def index_size_areas(analyzer):
     """
-    Numero de elementos en el indice por areas
+    Número de elementos en el índice por áreas.
     """
-    # TODO Retornar el numero de elementos en el árbol por areas
-    pass
+    # Verifica si el índice de áreas existe en el analizador
+    if "areaIndex" in analyzer:
+        return len(analyzer["areaIndex"])
+    return 0  # Retorna 0 si el índice de áreas no existe
 
 
 def min_key_areas(analyzer):
     """
-    Llave mas pequena por areas
+    Llave más pequeña por áreas.
     """
-    # TODO Retornar la llave más pequeña del árbol por áreas
-    pass
+    # Verifica si el árbol de áreas existe
+    if "areaIndex" in analyzer and analyzer["areaIndex"] is not None:
+        current_node = analyzer["areaIndex"]['root']
+        
+        while current_node['left'] is not None:
+            current_node = current_node['left']
+        
+        return current_node['key']  # Suponiendo que la llave está en 'key'
+    
+    return None  # Retorna None si no hay áreas
 
 
 def max_key_areas(analyzer):
     """
-    Llave mas grande por areas
+    Llave más grande por áreas.
     """
-    # TODO Retornar la llave más grande del árbol por áreas
-    pass
+    # Verifica si el árbol de áreas existe
+    if "areaIndex" in analyzer:
+        return rbt.right_key(analyzer["areaIndex"])
+    return None  # Retorna None si el árbol por áreas no existe
 
 def get_crimes_by_range_area(analyzer, initialArea, finalArea):
     """
-    Retorna el numero de crimenes en un rango de areas
+    Retorna el número de crímenes en un rango de áreas.
     """
-    # TODO Completar la consulta de crimenes por rango de areas
-    totalcrimes = 0
-    return totalcrimes
+    # Obtener todas las llaves (áreas) del índice de áreas
+    keys = rbt.key_set(analyzer["areaIndex"])
+
+    num_crimes = 0
+    
+    # Iterar sobre las áreas en el índice
+    for area in keys["elements"]:
+        if initialArea <= area <= finalArea:
+            # Obtener la lista de crímenes para el área actual
+            crimes_list = rbt.get(analyzer["areaIndex"], area)
+            # Sumar la cantidad de crímenes en esa área
+            num_crimes += len(crimes_list["crimes"])  # Asumiendo que los crímenes están en "crimes"
+    
+    return num_crimes
 
 def get_crimes_by_range(analyzer, initialDate, finalDate):
     """
